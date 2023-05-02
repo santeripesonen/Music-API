@@ -5,13 +5,14 @@ const fs = require("fs");
 const bodyParser = require('body-parser');
 const app = express();
 const mongoose = require("mongoose");
+
 const Song = require("./songSchema")
 
 app.use(cors())
 app.use(express.json());
 
 mongoose
-  .connect("mongodb+srv://music123:123music@cluster0.m7xj6xv.mongodb.net/?retryWrites=true&w=majority")
+  .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log("conencted to Mongo");
   })
@@ -45,7 +46,7 @@ app.get("/api/:id", (req, res) => {
 
 app.post("/api/add", (req, res) => {
   const {title, artist, songLength} = req.body;
-  
+
   const song = new Song({
     title,
     artist,
