@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 const path = require('path');
 const cors = require("cors")
@@ -10,7 +11,6 @@ const Song = require("./songSchema")
 
 app.use(cors())
 app.use(express.json());
-
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
@@ -26,6 +26,16 @@ app.get("/api/getall", async (req, res) => {
   });
 
   res.json(songs);
+})
+
+app.get("/api/filtered/:filter", async (req, res) => {
+  const filter = req.params.filter
+  const songs = await Song.find({}).catch((err) => {
+    console.log(err.message);
+  });
+  console.log("filter", filter);
+  const filteredSongs = songs.filter(song => (song.title.toLowerCase().includes(filter) || song.artist.toLowerCase().includes(filter)))
+  res.json(filteredSongs);
 })
 
 app.get("/api/:id", (req, res) => {
@@ -45,7 +55,7 @@ app.get("/api/:id", (req, res) => {
 })
 
 app.post("/api/add", (req, res) => {
-  const {title, artist, songLength} = req.body;
+  const { title, artist, songLength } = req.body;
 
   const song = new Song({
     title,
@@ -54,12 +64,12 @@ app.post("/api/add", (req, res) => {
   });
 
   song.save()
-  .then(response => {
-    res.json(response)
-  })
-  .catch(e => {
-    res.status(400).json({ error: "Deleting unsuccessful" });
-  })
+    .then(response => {
+      res.json(response)
+    })
+    .catch(e => {
+      res.status(400).json({ error: "Deleting unsuccessful" });
+    })
 })
 
 app.put("/api/update/:id", (req, res) => {
@@ -89,7 +99,7 @@ app.delete("/api/delete/:id", (req, res) => {
     });
 })
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 // Start the server
 app.listen(port, () => {
